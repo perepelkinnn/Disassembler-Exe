@@ -1,6 +1,8 @@
 class MSDOS:
+    """MS DOS Header"""
+
     def __init__(self, bytes):
-        self.magic = bytes[0:2].decode('utf-8')
+        self.magic = bytes[0:2]
         self.page_count = bytes[2:4]
         self.reloc_count = bytes[4:6]
         self.header_size = bytes[6:8]
@@ -15,11 +17,13 @@ class MSDOS:
         self.overlay_count = bytes[24:26]
         self.oem_identifier = bytes[36:38]
         self.oem_info = bytes[38:40]
-        self.pe_header_addr = int.from_bytes(bytes[60:64], "little")
+        self.pe_header_addr = bytes[60:64]
 
 
 class PE:
-    def __init__(self, bytes):        
+    """PE Header"""
+
+    def __init__(self, bytes):
         self.magic = bytes[0:4]
         self.cpu_pype = bytes[4:6]
         self.section_count = bytes[6:8]
@@ -28,9 +32,11 @@ class PE:
         self.symbol_table_size = bytes[16:20]
         self.optional_header_size = bytes[20:22]
         self.flags = bytes[22:24]
-         
+
 
 class OptionalHeader:
+    """Optional Header"""
+
     def __init__(self, bytes):
         self.magic = bytes[0:2]
         self.major_link_ver = bytes[2:3]
@@ -64,6 +70,33 @@ class OptionalHeader:
 
 
 class DataDir:
+    """Data Directory"""
+
     def __init__(self, bytes):
         self.virtual_address = bytes[0:4]
         self.size = bytes[4:8]
+
+
+class Section:
+    """Section"""
+
+    def __init__(self, bytes):
+        self.name = bytes[0:8]
+        self.virtual_size = bytes[8:12]
+        self.virtual_address = bytes[12:16]
+        self.size_of_raw_data = bytes[16:20]
+        self.pointer_to_raw_data = bytes[20:24]
+        self.pointer_to_relocations = bytes[24:28]
+        self.pointer_to_linenumbers = bytes[28:32]
+        self.number_of_relocations = bytes[32:34]
+        self.number_of_linenumbers = bytes[34:36]
+        self.characteristics = bytes[36:40]
+
+
+def head_to_str(head):
+    res = ""
+    res += head.__doc__ + '\n'
+    for attr in dir(head):
+        if attr[:2] != '__':
+            res += '\t' + attr + (30-len(attr))*' ' + str(head.__getattribute__(attr))[2:-1] + '\n'
+    return res
