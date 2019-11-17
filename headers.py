@@ -1,3 +1,6 @@
+from textwrap import wrap
+
+
 class MSDOS:
     """MS DOS Header"""
 
@@ -81,7 +84,7 @@ class Section:
     """Section"""
 
     def __init__(self, bytes):
-        self.name = bytes[0:8]
+        self.name = bytes[0:8].strip(b'x\00')
         self.virtual_size = bytes[8:12]
         self.virtual_address = bytes[12:16]
         self.size_of_raw_data = bytes[16:20]
@@ -98,5 +101,17 @@ def head_to_str(head):
     res += head.__doc__ + '\n'
     for attr in dir(head):
         if attr[:2] != '__':
-            res += '\t' + attr + (30-len(attr))*' ' + str(head.__getattribute__(attr))[2:-1] + '\n'
+            if ('name' in attr or 'magic' in attr) and head.__doc__ != 'Optional Header':
+                res += '\t' + attr + (30-len(attr))*' '
+                res += bytes_to_str(head.__getattribute__(attr)) + '\n'
+            else:
+                res += '\t' + attr + (30-len(attr))*' '
+                res += bytes_to_hex(head.__getattribute__(attr)) + '\n'
     return res
+
+def bytes_to_str(bytes):
+    return bytes.strip(b'x\00').decode('utf-8')
+
+
+def bytes_to_hex(bytes):
+    return ' '.join(wrap(bytes[::-1].hex(), 2))
