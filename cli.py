@@ -33,4 +33,4 @@ class cli:
                 if res:
                     print(res)
             else:
-                self.__commands__.help()
+                self.help()

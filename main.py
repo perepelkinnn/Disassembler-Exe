@@ -12,8 +12,8 @@ if __name__ == "__main__":
     commands = cli.cli()
 
     @commands.add
-    def select(path):
-        """Select exe file, args=path"""
+    def parse(path):
+        """Parse exe file, args=path"""
 
         global __dos__, __pe__, __optional__, __data_dirs__, __sections__
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
             with open(path, "rb") as f:
                 b = f.read(64)
                 __dos__ = MSDOS(b)
-                f.seek(int.from_bytes(__dos__.pe_header_addr, "little"))
+                f.seek(int.from_bytes(__dos__.pe_header_addr.value, "little"))
                 b = f.read(120)
                 __pe__ = PE(b[:24])
                 __optional__ = OptionalHeader(b[24:])
@@ -30,14 +30,15 @@ if __name__ == "__main__":
                 for i in range(16):
                     __data_dirs__.append(DataDir(b[8*i:8*(i+1)]))
                 __sections__ = []
-                b = f.read(40 * int.from_bytes(__pe__.section_count, "little"))
-                for i in range(int.from_bytes(__pe__.section_count, "little")):
+                b = f.read(
+                    40 * int.from_bytes(__pe__.section_count.value, "little"))
+                for i in range(int.from_bytes(__pe__.section_count.value, "little")):
                     __sections__.append(Section(b[40*i: 40*(i + 1)]))
         else:
             print("File doesn't exist")
 
     @commands.add
-    def headers():
+    def head():
         """Print MSDOS, PE, Optional headers"""
         global __dos__, __pe__, __optional__, __data_dirs__, __sections__
 
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         print(head_to_str(__optional__))
 
     @commands.add
-    def datadirs():
+    def data():
         """Print data dir array"""
         global __dos__, __pe__, __optional__, __data_dirs__, __sections__
 
